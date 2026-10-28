@@ -78,7 +78,7 @@ Read HANDOFF.md and continue from Next step.
 
 ## 为什么做这个
 
-我一个人开公司,手下大约 18 个 Claude Code 会话和 20 个定时 AI 任务([具体怎么管](https://github.com/Balance0014/one-person-ai-company)),全都用同一个套餐。一周的额度提前用完,定时任务也跟着停,要等到重置才有东西送达。上周就因为这个,少了四天的报告。这个工具,就是我用来找出那一周额度到底花在哪了。
+我一个人开公司,手下大约 18 个 Claude Code 会话和 20 个定时 AI 任务([具体怎么管](https://github.com/Balance0014/one-person-ai-company);这个工具来自其中的[第 3 章](https://github.com/Balance0014/one-person-ai-company/blob/main/playbook/zh-CN/03-handoff-records.md)和[第 6 章](https://github.com/Balance0014/one-person-ai-company/blob/main/playbook/zh-CN/06-quota-budget.md)),全都用同一个套餐。一周的额度提前用完,定时任务也跟着停,要等到重置才有东西送达。上周就因为这个,少了四天的报告。这个工具,就是我用来找出那一周额度到底花在哪了。
 
 ---
 

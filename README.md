@@ -89,7 +89,7 @@ Nothing is sent anywhere. Codex logs aren't supported yet.
 
 ## Why I built it
 
-I run a one-person company on about 18 Claude Code sessions and 20 scheduled AI jobs ([how that works](https://github.com/Balance0014/one-person-ai-company)). They all share one plan. When the week's limit runs out early, the scheduled jobs stop too, and nothing gets delivered until it resets. Last week that cost me four days of reports. This is how I found out where the week was going.
+I run a one-person company on about 18 Claude Code sessions and 20 scheduled AI jobs ([how that works](https://github.com/Balance0014/one-person-ai-company); this tool comes from chapters [3](https://github.com/Balance0014/one-person-ai-company/blob/main/playbook/03-handoff-records.md) and [6](https://github.com/Balance0014/one-person-ai-company/blob/main/playbook/06-quota-budget.md)). They all share one plan. When the week's limit runs out early, the scheduled jobs stop too, and nothing gets delivered until it resets. Last week that cost me four days of reports. This is how I found out where the week was going.
 
 ---
 
