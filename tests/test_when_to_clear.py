@@ -40,6 +40,18 @@ class Parse(unittest.TestCase):
         self.assertEqual(sum(cs[1][1:4]), 90_000)
 
 
+class Records(unittest.TestCase):
+    def test_api_errors_are_not_replies(self):
+        err = json.dumps({'type': 'assistant', 'timestamp': '2026-10-28T10:00:00Z', 'message': {
+            'id': 'msg_err', 'model': '<synthetic>', 'usage': {'input_tokens': 0, 'output_tokens': 0}}})
+        _, p = write([err] + reply(1, 70_000))
+        self.assertEqual(len(W.calls(p)), 1)
+
+    def test_first_reply_is_not_a_resend(self):
+        r = W.analyze({'a': W.calls(write(reply(1, 70_000, write=69_000) + reply(2, 72_000))[1])}, 200_000)
+        self.assertEqual(r['rewrites'], 0)
+
+
 class Analyze(unittest.TestCase):
     def test_short_sessions_cost_nothing_extra(self):
         r = W.analyze({'a': W.calls(write([l for i in range(20) for l in reply(i, 60_000 + i * 2_000)])[1])}, 200_000)
@@ -92,6 +104,17 @@ class Hook(unittest.TestCase):
         self.assertIn('210k tokens', json.loads(out)['systemMessage'])
         self.assertEqual(self.run_hook(reply(1, 250_000)), '')          # same step: stays quiet
         self.assertIn('systemMessage', self.run_hook(reply(1, 320_000)))  # next step: reminds again
+
+    def test_reminds_again_after_compaction(self):
+        self.assertIn('systemMessage', self.run_hook(reply(1, 210_000)))
+        self.assertIn('systemMessage', self.run_hook(reply(2, 320_000)))
+        self.assertEqual(self.run_hook(reply(3, 60_000)), '')            # compacted
+        self.assertIn('systemMessage', self.run_hook(reply(4, 220_000)))
+
+    def test_bad_size_never_crashes_the_hook(self):
+        _, p = write(reply(1, 300_000))
+        sys.stdin = io.StringIO(json.dumps({'transcript_path': p, 'session_id': 'x'}))
+        self.assertEqual(W.hook('200kb'), 0)
 
     def test_never_blocks_or_crashes(self):
         out = self.run_hook(reply(1, 900_000))

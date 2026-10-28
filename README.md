@@ -4,18 +4,18 @@
 
 [中文说明](README.zh-CN.md) · MIT · Python 3.9+, no dependencies · reads local files only
 
-![when-to-clear report: 82% of the work happened in conversations over 200k tokens; restarting at 200k would have saved about a third](docs/demo.svg)
+![when-to-clear report: 81% of the work happened in conversations over 200k tokens; restarting at 200k would have saved about a quarter](docs/demo.svg)
 
 Every reply re-sends the whole conversation. Caching cuts the price of that to a tenth, but at 400k tokens even "ok, go on" re-reads 400k tokens before the model writes a word.
 
-I ran the report on my own sessions on October 28, 2026. Over the last 7 days (91 transcripts, including subagents, and 9,837 replies):
+I ran the report on my own sessions on October 28, 2026. Over the last 7 days (93 transcripts, including subagents, and 9,981 replies):
 
-- **82% of the work happened while a conversation was over 200k tokens.** ("Work" means tokens weighted by API price; details below.)
-- Starting fresh at 200k with a short handoff note would have saved about a third (33%), after paying for the note and for the files the agent reads again.
-- A long conversation missed the cache and was re-sent in full 109 times. 96 of those came after a break of five minutes or more.
-- A new session already holds about 63k tokens by its first reply: system prompt, tools, MCP servers, CLAUDE.md, memory, and your first message.
+- **81% of the work happened while a conversation was over 200k tokens.** ("Work" means tokens weighted by API price; details below.)
+- Starting fresh at 200k with a short handoff note would have saved about a quarter (27%), after paying for the note and for the files the agent reads again.
+- A long conversation missed the cache and was re-sent in full 90 times, every one of them after a break of five minutes or more.
+- A new session already holds about 71k tokens by its first reply: system prompt, tools, MCP servers, CLAUDE.md, memory, and your first message.
 
-Over 30 days, 90% of the work was past 200k, and restarting there would have saved 42%.
+Over 30 days, 90% of the work was past 200k, and restarting there would have saved 37%.
 
 ## Three parts
 
@@ -26,12 +26,12 @@ python3 when_to_clear.py
 ```
 
 ```text
-when-to-clear · last 7 days · 91 transcripts · 9,837 replies
+when-to-clear · last 7 days · 93 transcripts · 9,981 replies
 Tokens re-read as context: 2.9B
-  82% of the work happened while a conversation was over 200k tokens.
-  Starting fresh at 200k with a short handoff note would have saved about 33% (124 restarts).
-  Long conversations were re-sent from scratch 109 times, 96 of them after a break of 5+ minutes (11% of the work).
-  A new session holds about 63k tokens by its first reply (system prompt, tools, MCP servers, CLAUDE.md, memory, your first message).
+  81% of the work happened while a conversation was over 200k tokens.
+  Starting fresh at 200k with a short handoff note would have saved about 27% (119 restarts).
+  Long conversations were re-sent from scratch 90 times, 90 of them after a break of 5+ minutes (9% of the work).
+  A new session holds about 71k tokens by its first reply (system prompt, tools, MCP servers, CLAUDE.md, memory, your first message).
 Heaviest sessions:
   ...
 ```
@@ -83,7 +83,7 @@ The report reads the token counts Claude Code already saves with every reply in 
 
 The saving replays your own history. Whenever a conversation would have passed the size you set, it restarts from that session's own starting size plus 30k (a ~5k note and ~25k of files read again), and it charges for writing the note. It assumes the rest of the session would have gone the same way. If your agent has to re-read much more after a restart, your real saving is smaller; change `HANDOFF` in the script to model that.
 
-Nothing is sent anywhere. Codex logs aren't supported yet.
+Nothing is sent anywhere. Codex logs aren't supported yet. On Windows, if `python3` isn't on your PATH, use `python` instead.
 
 ## Why I built it
 

@@ -65,11 +65,13 @@ def calls(path):
             if e.get('type') != 'assistant' or not isinstance(u, dict):
                 continue
             key = m.get('id') or e.get('requestId') or e.get('uuid')
-            if key in seen:
+            if key in seen or m.get('model') == '<synthetic>':     # API errors are logged as empty replies
                 continue
             seen.add(key)
-            out.append((e.get('timestamp') or '', u.get('input_tokens') or 0, u.get('cache_creation_input_tokens') or 0,
-                        u.get('cache_read_input_tokens') or 0, u.get('output_tokens') or 0))
+            c = (e.get('timestamp') or '', u.get('input_tokens') or 0, u.get('cache_creation_input_tokens') or 0,
+                 u.get('cache_read_input_tokens') or 0, u.get('output_tokens') or 0)
+            if sum(c[1:4]):
+                out.append(c)
     return out
 
 
@@ -87,10 +89,11 @@ def analyze(sessions, at):
         if not cs:
             continue
         base = sum(cs[0][1:4])
-        starts.append(base)
+        if '/subagents/' not in name.replace(os.sep, '/'):
+            starts.append(base)                        # main sessions only; subagents start smaller
         floor = base + HANDOFF                         # where a fresh session would start
         peak, offset, s_w, prev = 0, 0, 0.0, None
-        for ts, inp, cw, cr, out in cs:
+        for n, (ts, inp, cw, cr, out) in enumerate(cs):
             ctx = inp + cw + cr
             w = weight(inp, cw, cr, out)
             n_calls += 1
@@ -101,7 +104,7 @@ def analyze(sessions, at):
             if ctx > at:
                 over_w += w
                 over_raw += ctx
-            if ctx > 50_000 and cw > ctx / 2:          # the whole conversation re-sent at write price
+            if n and ctx > 50_000 and cw > ctx / 2:    # the whole conversation re-sent (a session's first reply doesn't count)
                 rewrites += 1
                 rewrite_w += W_WRITE * cw
                 if prev and _gap(prev, ts) >= BREAK:
@@ -119,7 +122,7 @@ def analyze(sessions, at):
         biggest.append((s_w, peak, len(cs), name))
     biggest.sort(reverse=True)
     return {
-        'sessions': len(starts), 'calls': n_calls, 'tokens_read': raw,
+        'sessions': len([1 for cs in sessions.values() if cs]), 'calls': n_calls, 'tokens_read': raw,
         'share_over': over_w / tot_w if tot_w else 0.0, 'raw_share_over': over_raw / raw if raw else 0.0,
         'saved_share': max(0.0, saved_w) / tot_w if tot_w else 0.0, 'clears': clears,
         'rewrites': rewrites, 'rewrites_after_break': after_break, 'rewrite_share': rewrite_w / tot_w if tot_w else 0.0,
@@ -173,30 +176,38 @@ def report(r, days, at):
             print(f'  {b["share"]:5.1%} of the work · peaked at {human(b["peak"])} · {b["calls"]} replies · {b["session"]}')
 
 
+def _save(state):
+    os.makedirs(os.path.dirname(STATE), exist_ok=True)
+    with open(STATE, 'w', encoding='utf-8') as f:
+        json.dump(dict(list(state.items())[-200:]), f)
+
+
 def hook(at):
     """Stop hook: remind once per size step (at, 1.5x, 2x, ...). Never blocks, never fails loudly."""
     try:
-        payload = json.loads(sys.stdin.read() or '{}')
+        at = size(at)
+        buf = getattr(sys.stdin, 'buffer', None)
+        payload = json.loads((buf.read().decode('utf-8', 'replace') if buf else sys.stdin.read()) or '{}')
         cs = calls(payload['transcript_path'])
         if not cs:
             return 0
         ctx = sum(cs[-1][1:4])
         step = at // 2
         level = 0 if ctx < at else (ctx - at) // step + 1
-        if not level:
-            return 0
         try:
             with open(STATE, encoding='utf-8') as f:
                 state = json.load(f)
         except (OSError, ValueError):
             state = {}
         sid = str(payload.get('session_id'))
-        if state.get(sid, 0) >= level:
+        seen = state.get(sid, 0)
+        if level <= seen:
+            if level < seen:                            # shrank after /compact: start counting again from here
+                state[sid] = level
+                _save(state)
             return 0
         state[sid] = level
-        os.makedirs(os.path.dirname(STATE), exist_ok=True)
-        with open(STATE, 'w', encoding='utf-8') as f:
-            json.dump(dict(list(state.items())[-200:]), f)
+        _save(state)
         print(json.dumps({'systemMessage': (
             f'when-to-clear: this conversation is at {human(ctx)} tokens, and every reply re-reads all of it. '
             'At your next stopping point, ask Claude to write a handoff note, then /clear and paste it.')}))
@@ -220,9 +231,13 @@ def main(argv):
     if len(args) % 2:
         print(__doc__)
         return 2
-    at = size(opt['--at'])
     if mode == 'hook':
-        return hook(at)
+        return hook(opt['--at'])
+    try:
+        at = size(opt['--at'])
+    except ValueError:
+        print(__doc__)
+        return 2
     days = int(opt['--days'])
     r = analyze(load(os.path.expanduser(opt['--dir']), days), at)
     if as_json:
