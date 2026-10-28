@@ -8,7 +8,7 @@
 
 Every reply re-sends the whole conversation so far. Caching makes that cheaper, not free. At 50k tokens it doesn't matter. At 400k, every "ok, go on" re-reads 400k tokens before the model writes a word.
 
-I ran this on my own machine. Last 7 days, 83 sessions, 9,863 replies:
+I ran it on my own machine on October 28, 2026. Last 7 days, 83 sessions, 9,863 replies:
 
 - **83% of the work happened while a conversation was over 200k tokens.**
 - **Starting fresh at 200k with a short handoff note would have saved about half (53%)**, after paying for the note and for the files the agent would read again.
