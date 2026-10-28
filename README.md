@@ -4,6 +4,8 @@
 
 [中文说明](README.zh-CN.md) · MIT · Python 3.9+, no dependencies · reads local files only
 
+![when-to-clear report: 83% of the work happened in conversations over 200k tokens; restarting at 200k would have saved about 53%](docs/demo.svg)
+
 Every reply re-sends the whole conversation so far. Caching makes that cheaper, not free. At 50k tokens it doesn't matter. At 400k, every "ok, go on" re-reads 400k tokens before the model writes a word.
 
 I ran this on my own machine. Last 7 days, 83 sessions, 9,863 replies:

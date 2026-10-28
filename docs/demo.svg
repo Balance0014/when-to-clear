@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="272" viewBox="0 0 920 272" role="img" aria-label="python3 when_to_clear.py (my machine, last 7 days)">
+<title>python3 when_to_clear.py (my machine, last 7 days)</title>
+<rect width="920" height="272" rx="10" fill="#0d1117"/>
+<rect width="920" height="32" rx="10" fill="#161b22"/><rect y="22" width="920" height="10" fill="#161b22"/>
+<circle cx="20" cy="16" r="6" fill="#ff5f57"/><circle cx="40" cy="16" r="6" fill="#febc2e"/><circle cx="60" cy="16" r="6" fill="#28c840"/>
+<text x="460" y="21" text-anchor="middle" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="13" fill="#8b949e">python3 when_to_clear.py (my machine, last 7 days)</text>
+<g font-family="SFMono-Regular,Menlo,Consolas,Liberation Mono,monospace" font-size="14" xml:space="preserve" style="white-space:pre">
+<text x="22" y="66" fill="#d4d4d4">when-to-clear · last 7 days · 83 sessions · 9,863 replies</text>
+<text x="22" y="88" fill="#d4d4d4">Tokens re-read as context: 2.9B</text>
+<text x="22" y="110" fill="#e3b341">  83% of the work happened while a conversation was over 200k tokens.</text>
+<text x="22" y="132" fill="#7ee787">  Starting fresh at 200k with a short handoff note would have saved about 53%.</text>
+<text x="22" y="154" fill="#d4d4d4">  Long sessions were re-sent at full price 109 times after their cache expired.</text>
+<text x="22" y="176" fill="#d4d4d4">  A new session starts at about 70k tokens before your first message.</text>
+<text x="22" y="198" fill="#8b949e"></text>
+<text x="22" y="220" fill="#8b949e">Stop hook, when a session passes 200k:</text>
+<text x="22" y="242" fill="#ffffff" font-weight="600">  when-to-clear: this conversation is at 348k tokens, and every reply re-reads all of it.</text>
+</g>
+</svg>

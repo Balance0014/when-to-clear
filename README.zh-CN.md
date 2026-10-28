@@ -4,6 +4,8 @@
 
 [English](README.md) · MIT · Python 3.9+,不用装任何依赖 · 只读本机文件
 
+![when-to-clear report: 83% of the work happened in conversations over 200k tokens; restarting at 200k would have saved about 53%](docs/demo.svg)
+
 AI 每回一句话,都要把到这为止的整段对话重新发一遍。有缓存会便宜些,但不是免费。对话只有 5 万 token 时无所谓;到了 40 万,你每说一句「好,继续」,模型动笔之前都要先把这 40 万重读一遍。
 
 我在自己电脑上跑了一下,最近 7 天,83 个会话,9,863 次回复:
