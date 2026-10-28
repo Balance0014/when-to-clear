@@ -30,10 +30,12 @@ from datetime import datetime, timedelta, timezone
 ROOT = os.path.expanduser('~/.claude/projects')
 STATE = os.environ.get('WHEN_TO_CLEAR_STATE') or os.path.expanduser('~/.claude/when-to-clear/nudged.json')
 W_READ, W_WRITE, W_OUT = 0.1, 1.25, 5.0
-# What a restart costs, on the cautious side: the new session holds a ~5k handoff note plus
-# ~25k of files the agent has to read again, and the note itself takes ~2k output tokens.
+# What a restart costs, on the cautious side: the new session starts from the same fixed overhead as
+# this one (system prompt, tools, CLAUDE.md), plus a ~5k handoff note and ~25k of files the agent
+# has to read again; writing the note takes ~2k output tokens.
 HANDOFF = 30_000
 HANDOFF_COST = 2_000
+BREAK = 300               # seconds of quiet before a full re-send counts as "after a break"
 
 
 def size(text):
@@ -79,14 +81,16 @@ def analyze(sessions, at):
     """sessions: {name: [call, ...]}. Returns the numbers the report prints."""
     tot_w = over_w = saved_w = 0.0
     raw = over_raw = 0
-    rewrites, rewrite_w, starts, n_calls, clears = 0, 0.0, [], 0, 0
+    rewrites, after_break, rewrite_w, starts, n_calls, clears = 0, 0, 0.0, [], 0, 0
     biggest = []
     for name, cs in sessions.items():
         if not cs:
             continue
-        starts.append(sum(cs[0][1:4]))
-        peak, offset, s_w = 0, 0, 0.0
-        for _, inp, cw, cr, out in cs:
+        base = sum(cs[0][1:4])
+        starts.append(base)
+        floor = base + HANDOFF                         # where a fresh session would start
+        peak, offset, s_w, prev = 0, 0, 0.0, None
+        for ts, inp, cw, cr, out in cs:
             ctx = inp + cw + cr
             w = weight(inp, cw, cr, out)
             n_calls += 1
@@ -100,14 +104,17 @@ def analyze(sessions, at):
             if ctx > 50_000 and cw > ctx / 2:          # the whole conversation re-sent at write price
                 rewrites += 1
                 rewrite_w += W_WRITE * cw
+                if prev and _gap(prev, ts) >= BREAK:
+                    after_break += 1
+            prev = ts
             # Start fresh at `at` with a handoff note: everything above the note is not re-read.
             if ctx < offset:                            # the real session was compacted or cleared
                 offset = 0
-            if ctx - offset > at:
-                offset = ctx - HANDOFF
+            if ctx - offset > at and floor < at:
+                offset = ctx - floor
                 clears += 1
                 saved_w -= W_WRITE * HANDOFF + W_OUT * HANDOFF_COST
-            cut = max(0, min(ctx - HANDOFF, offset))
+            cut = max(0, min(ctx - floor, offset))
             saved_w += W_READ * min(cut, cr) + W_WRITE * min(max(0, cut - cr), cw) + max(0, cut - cr - cw)
         biggest.append((s_w, peak, len(cs), name))
     biggest.sort(reverse=True)
@@ -115,11 +122,19 @@ def analyze(sessions, at):
         'sessions': len(starts), 'calls': n_calls, 'tokens_read': raw,
         'share_over': over_w / tot_w if tot_w else 0.0, 'raw_share_over': over_raw / raw if raw else 0.0,
         'saved_share': max(0.0, saved_w) / tot_w if tot_w else 0.0, 'clears': clears,
-        'rewrites': rewrites, 'rewrite_share': rewrite_w / tot_w if tot_w else 0.0,
+        'rewrites': rewrites, 'rewrites_after_break': after_break, 'rewrite_share': rewrite_w / tot_w if tot_w else 0.0,
         'start_median': int(statistics.median(starts)) if starts else 0,
         'biggest': [{'session': n, 'share': w / tot_w if tot_w else 0, 'peak': p, 'calls': c}
                     for w, p, c, n in biggest[:5]],
     }
+
+
+def _gap(a, b):
+    try:
+        t = [datetime.fromisoformat(x.replace('Z', '+00:00')) for x in (a, b)]
+        return (t[1] - t[0]).total_seconds()
+    except ValueError:
+        return 0
 
 
 def load(root, days):
@@ -143,15 +158,15 @@ def human(n):
 
 def report(r, days, at):
     k = human(at)
-    print(f'when-to-clear · last {days} days · {r["sessions"]} sessions · {r["calls"]:,} replies')
+    print(f'when-to-clear · last {days} days · {r["sessions"]} transcripts · {r["calls"]:,} replies')
     print(f'Tokens re-read as context: {human(r["tokens_read"])}')
     print(f'  {r["share_over"]:.0%} of the work happened while a conversation was over {k} tokens.')
     print(f'  Starting fresh at {k} with a short handoff note would have saved about {r["saved_share"]:.0%}'
           f' ({r["clears"]} restarts).')
-    print(f'  Long sessions were re-sent from scratch {r["rewrites"]} times, usually after their cache expired'
-          f' ({r["rewrite_share"]:.0%} of the work).')
-    print(f'  A new session starts at about {human(r["start_median"])} tokens before your first message'
-          ' (system prompt, tools, MCP servers, CLAUDE.md, memory).')
+    print(f'  Long conversations were re-sent from scratch {r["rewrites"]} times, {r["rewrites_after_break"]} of them'
+          f' after a break of 5+ minutes ({r["rewrite_share"]:.0%} of the work).')
+    print(f'  A new session holds about {human(r["start_median"])} tokens by its first reply'
+          ' (system prompt, tools, MCP servers, CLAUDE.md, memory, your first message).')
     if r['biggest']:
         print('Heaviest sessions:')
         for b in r['biggest']:

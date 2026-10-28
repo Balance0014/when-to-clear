@@ -5,7 +5,7 @@ description: Use when the user asks for a handoff note, wants to /clear or start
 
 # handoff
 
-A long conversation costs more with every reply, because every reply re-reads all of it. A fresh session with a good note costs a fraction of that and loses nothing that matters. Your job is to write the note that makes the fresh session as useful as this one.
+A long conversation costs more with every reply, because every reply re-reads all of it. A fresh session that starts from a good note re-reads a few thousand tokens instead of hundreds of thousands. Your job is to write the note that lets the fresh session pick up where this one stopped.
 
 ## When to write it
 
@@ -13,7 +13,7 @@ At a natural stopping point: a change is committed, a question is answered, a te
 
 ## What to write
 
-Write `HANDOFF.md` in the project root (or the path the user names). Overwrite the previous note; git keeps the history. First line:
+Write `HANDOFF.md` in the project root (or the path the user names), replacing the previous note. Ask the user once whether they want it committed with the work or listed in `.gitignore`. First line:
 
 `Updated: <date and time with time zone>`
 
@@ -25,13 +25,13 @@ Then these seven sections, in this order. Write "none" rather than dropping a se
 4. **Next step.** The single next action, specific enough to start without asking: the command to run or the file to open.
 5. **Blocked on.** Anything waiting on the user or someone else, and what exactly is needed.
 6. **Branch.** The branch you are on and where it should go.
-7. **Uncommitted changes.** Run `git status --short` and list what is not committed or not pushed. Commit or stash before the user clears, if they agree.
+7. **Uncommitted changes.** Run `git status --short` and list what is not committed or not pushed (leave HANDOFF.md itself out). Offer to commit or stash them before the user clears.
 
 Then add a short **Context** section with only what the next session can't get from the code: decisions the user made and why, approaches you tried that failed, numbers you measured. Leave out anything a quick read of the repo would show.
 
 ## Keep it short
 
-Aim for under 60 lines. The note is read at the start of every new session, so every line costs something too. Link to files instead of pasting them.
+Aim for under 60 lines. The next session reads all of it before doing anything, so every line costs something too. Link to files instead of pasting them.
 
 ## Then tell the user
 
