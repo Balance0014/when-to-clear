@@ -12,7 +12,7 @@ I ran this on my own machine. Last 7 days, 83 sessions, 9,863 replies:
 
 - **83% of the work happened while a conversation was over 200k tokens.**
 - **Starting fresh at 200k with a short handoff note would have saved about half (53%)**, after paying for the note and for the files the agent would read again.
-- 109 times a long session was re-sent at full price, because I came back after its cache had expired.
+- 109 times a long session had to be re-sent from scratch, usually because I came back after its cache had expired.
 - A brand-new session already holds about 70k tokens before I type anything: system prompt, tools, MCP servers, CLAUDE.md, memory.
 
 Over 30 days the numbers were 91% and 62%.
@@ -30,7 +30,7 @@ when-to-clear · last 7 days · 83 sessions · 9,863 replies
 Tokens re-read as context: 2.9B
   83% of the work happened while a conversation was over 200k tokens.
   Starting fresh at 200k with a short handoff note would have saved about 53% (112 restarts).
-  Long sessions were re-sent at full price 109 times after their cache expired (11% of the work).
+  Long sessions were re-sent from scratch 109 times, usually after their cache expired (11% of the work).
   A new session starts at about 70k tokens before your first message (system prompt, tools, MCP servers, CLAUDE.md, memory).
 Heaviest sessions:
   ...
@@ -38,7 +38,7 @@ Heaviest sessions:
 
 Options: `--days 30`, `--at 150k` to try a different restart size, `--dir` for another transcripts folder, `--json` for raw numbers.
 
-**2. The reminder.** A Stop hook. When a conversation passes 200k tokens, you get one line:
+**2. The reminder.** A Stop hook. When a conversation passes 200k tokens, you get a short note:
 
 ```text
 when-to-clear: this conversation is at 348k tokens, and every reply re-reads all of it.

@@ -148,7 +148,7 @@ def report(r, days, at):
     print(f'  {r["share_over"]:.0%} of the work happened while a conversation was over {k} tokens.')
     print(f'  Starting fresh at {k} with a short handoff note would have saved about {r["saved_share"]:.0%}'
           f' ({r["clears"]} restarts).')
-    print(f'  Long sessions were re-sent at full price {r["rewrites"]} times after their cache expired'
+    print(f'  Long sessions were re-sent from scratch {r["rewrites"]} times, usually after their cache expired'
           f' ({r["rewrite_share"]:.0%} of the work).')
     print(f'  A new session starts at about {human(r["start_median"])} tokens before your first message'
           ' (system prompt, tools, MCP servers, CLAUDE.md, memory).')

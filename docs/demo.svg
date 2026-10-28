@@ -9,7 +9,7 @@
 <text x="22" y="88" fill="#d4d4d4">Tokens re-read as context: 2.9B</text>
 <text x="22" y="110" fill="#e3b341">  83% of the work happened while a conversation was over 200k tokens.</text>
 <text x="22" y="132" fill="#7ee787">  Starting fresh at 200k with a short handoff note would have saved about 53%.</text>
-<text x="22" y="154" fill="#d4d4d4">  Long sessions were re-sent at full price 109 times after their cache expired.</text>
+<text x="22" y="154" fill="#d4d4d4">  Long sessions were re-sent from scratch 109 times, usually after their cache expired.</text>
 <text x="22" y="176" fill="#d4d4d4">  A new session starts at about 70k tokens before your first message.</text>
 <text x="22" y="198" fill="#8b949e"></text>
 <text x="22" y="220" fill="#8b949e">Stop hook, when a session passes 200k:</text>
