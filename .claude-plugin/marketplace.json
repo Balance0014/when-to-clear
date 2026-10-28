@@ -1,0 +1,19 @@
+{
+  "name": "when-to-clear",
+  "owner": {
+    "name": "Balance Zhao"
+  },
+  "metadata": {
+    "description": "Shows how much of your Claude Code usage goes to re-reading long conversations, and helps you start fresh without losing your place.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "when-to-clear",
+      "source": "./",
+      "description": "A reminder when a session passes 200k tokens, plus a handoff skill: write a note, /clear, paste, keep going.",
+      "category": "productivity",
+      "tags": ["usage", "context", "handoff"]
+    }
+  ]
+}

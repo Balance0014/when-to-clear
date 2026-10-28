@@ -1,0 +1,16 @@
+{
+  "description": "when-to-clear: a one-line reminder when the conversation passes 200k tokens. Never blocks. Local only, no network.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/when_to_clear.py\" hook --at 200k",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

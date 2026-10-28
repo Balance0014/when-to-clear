@@ -1,0 +1,13 @@
+{
+  "name": "when-to-clear",
+  "description": "Shows how much of your Claude Code usage goes to re-reading long conversations, reminds you when a session gets heavy, and writes a handoff note so /clear doesn't lose your place.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Balance Zhao",
+    "url": "https://github.com/Balance0014"
+  },
+  "homepage": "https://github.com/Balance0014/when-to-clear",
+  "repository": "https://github.com/Balance0014/when-to-clear",
+  "license": "MIT",
+  "keywords": ["claude-code", "usage", "limits", "context", "tokens", "handoff"]
+}
